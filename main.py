@@ -1,13 +1,22 @@
 from fastapi import FastAPI
 from ollama import Client
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-client = Client(
-  host='http://localhost:11434',
-  headers={'x-some-header': 'some-value'}
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-#
+client = Client(
+    host='http://localhost:11434',
+    headers={'x-some-header': 'some-value'}
+)
+
 @app.get("/{content}")
 async def root(content: str):
     response = client.chat(model='llama3.2:1b', messages=[
@@ -16,13 +25,4 @@ async def root(content: str):
             'content': content,
         },
     ])
-    return response.message.content
-#
-#
-# @app.get("/hello/{name}")
-# async def say_hello(name: str):
-#     return {"message": f"Hello {name}"}
-
-
-
-# print(response.message.content)
+    return {"message": response.message.content}
